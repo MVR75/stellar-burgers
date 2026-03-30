@@ -1,9 +1,11 @@
 import {
   getUserApi,
   loginUserApi,
+  logoutApi,
   registerUserApi,
   TLoginData,
-  TRegisterData
+  TRegisterData,
+  updateUserApi
 } from '@api';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TUser } from '@utils-types';
@@ -45,6 +47,26 @@ export const loginUser = createAsyncThunk<
     const apiError = err as { success: boolean; message: string };
     return rejectWithValue(apiError.message);
   }
+});
+
+export const updateUser = createAsyncThunk<
+  TUser,
+  Partial<TRegisterData>,
+  { rejectValue: string }
+>('user/update', async (data: Partial<TRegisterData>, { rejectWithValue }) => {
+  try {
+    const response = await updateUserApi(data);
+    return response.user;
+  } catch (err) {
+    const apiError = err as { success: boolean; message: string };
+    return rejectWithValue(apiError.message);
+  }
+});
+
+export const logoutUser = createAsyncThunk('user/logout', async () => {
+  await logoutApi();
+  localStorage.removeItem('refreshToken');
+  deleteCookie('accessToken');
 });
 
 export const initAuth = createAsyncThunk<
@@ -134,6 +156,13 @@ export const userSlice = createSlice({
         state.isAuthChecked = true;
         state.error =
           action.payload ?? action.error.message ?? 'Ошибка загрузки';
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.user = action.payload;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.isAuth = false;
       });
   }
 });

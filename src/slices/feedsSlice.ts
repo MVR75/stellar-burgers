@@ -1,6 +1,6 @@
 import { getFeedsApi } from '@api';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { TOrder } from '@utils-types';
+import { TOrder, TOrdersData } from '@utils-types';
 
 type TFeedsPayload = {
   orders: TOrder[];
@@ -22,10 +22,7 @@ export const getFeeds = createAsyncThunk<
   }
 });
 
-type TFeedsState = {
-  orders: TOrder[];
-  total: number;
-  totalToday: number;
+type TFeedsState = TOrdersData & {
   isLoading: boolean;
   error: string | null;
 };
