@@ -1,4 +1,4 @@
-import { getFeedsApi } from '@api';
+import { getFeedsApi, getOrderByNumberApi } from '@api';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { TOrder, TOrdersData } from '@utils-types';
 
@@ -16,6 +16,20 @@ export const getFeeds = createAsyncThunk<
   try {
     const { orders, total, totalToday } = await getFeedsApi();
     return { orders, total, totalToday };
+  } catch (err) {
+    const apiError = err as { success: boolean; message: string };
+    return rejectWithValue(apiError.message);
+  }
+});
+
+export const getOrderByNumber = createAsyncThunk<
+  TOrder[],
+  number,
+  { rejectValue: string }
+>('feed/getOrderByNumber', async (number, { rejectWithValue }) => {
+  try {
+    const response = await getOrderByNumberApi(number);
+    return response.orders;
   } catch (err) {
     const apiError = err as { success: boolean; message: string };
     return rejectWithValue(apiError.message);
@@ -45,7 +59,9 @@ export const feedsSlice = createSlice({
     selectFeed: (state) => ({
       total: state.total,
       totalToday: state.totalToday
-    })
+    }),
+    selectOrderByNumber: (state, number: number) =>
+      state.orders.find((item) => item.number === number)
   },
   extraReducers: (builder) => {
     builder
@@ -63,9 +79,20 @@ export const feedsSlice = createSlice({
         state.isLoading = false;
         state.error =
           action.payload ?? action.error.message ?? 'Ошибка загрузки';
+      })
+      .addCase(getOrderByNumber.fulfilled, (state, action) => {
+        state.orders = action.payload;
+      })
+      .addCase(getOrderByNumber.rejected, (state, action) => {
+        state.error =
+          action.payload ?? action.error.message ?? 'Ошибка загрузки';
       });
   }
 });
 
-export const { selectFeedsLoading, selectOrders, selectFeed } =
-  feedsSlice.selectors;
+export const {
+  selectFeedsLoading,
+  selectOrders,
+  selectFeed,
+  selectOrderByNumber
+} = feedsSlice.selectors;

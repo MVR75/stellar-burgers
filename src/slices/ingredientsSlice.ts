@@ -39,7 +39,9 @@ export const ingredientsSlice = createSlice({
   reducers: {},
   selectors: {
     selectLoading: (state) => state.isIngredientsLoading,
-    selectIngredientsErrors: (state) => state.error
+    selectIngredientsErrors: (state) => state.error,
+    selectIngredientById: (state, id: string) =>
+      state.ingredients.find((item) => item._id === id)
   },
   extraReducers: (builder) => {
     builder
@@ -62,6 +64,16 @@ export const ingredientsSlice = createSlice({
 export const selectIngredients = (state: RootState) =>
   state.ingredients.ingredients;
 
+export const selectIngredientsByIds = createSelector(
+  [selectIngredients, (_: RootState, ids: string[]) => ids],
+  (ingredients, ids) => {
+    const byId = new Map(ingredients.map((item) => [item._id, item]));
+    return ids
+      .map((id) => byId.get(id))
+      .filter((item): item is TIngredient => Boolean(item));
+  }
+);
+
 export const selectBuns = createSelector([selectIngredients], (ingredients) =>
   ingredients.filter((item) => item.type === 'bun')
 );
@@ -74,5 +86,5 @@ export const selectSauces = createSelector([selectIngredients], (ingredients) =>
   ingredients.filter((item) => item.type === 'sauce')
 );
 
-export const { selectLoading, selectIngredientsErrors } =
+export const { selectLoading, selectIngredientsErrors, selectIngredientById } =
   ingredientsSlice.selectors;

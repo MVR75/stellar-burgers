@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { useSelector } from '../../services/store';
 import { selectIsAuth, selectIsAuthChecked } from '../../slices/userSlice';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Preloader } from '@ui';
 
 type ProtectedRouteProps = {
@@ -11,6 +11,8 @@ type ProtectedRouteProps = {
 export const ProtectedRoute: FC<ProtectedRouteProps> = ({
   onlyUnAuth = false
 }) => {
+  const location = useLocation();
+
   const isAuth = useSelector(selectIsAuth);
   const isAuthChecked = useSelector(selectIsAuthChecked);
 
@@ -23,7 +25,7 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
   }
 
   if (!isAuth && !onlyUnAuth) {
-    return <Navigate to='/login' />;
+    return <Navigate to='/login' state={{ from: location }} replace />;
   }
 
   return <Outlet />;

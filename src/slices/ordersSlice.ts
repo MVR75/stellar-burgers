@@ -1,4 +1,4 @@
-import { orderBurgerApi } from '@api';
+import { getOrdersApi, orderBurgerApi } from '@api';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { TOrder } from '@utils-types';
 
@@ -16,16 +16,33 @@ export const orderBurger = createAsyncThunk<
   }
 });
 
+export const getUserOrders = createAsyncThunk<
+  TOrder[],
+  void,
+  { rejectValue: string }
+>('orders/getUserOrders', async (_, { rejectWithValue }) => {
+  try {
+    return await getOrdersApi();
+  } catch (err) {
+    const apiError = err as { success: boolean; message: string };
+    return rejectWithValue(apiError.message);
+  }
+});
+
 type TOrderState = {
   orderRequest: boolean;
   orderModalData: number | null;
   orders: TOrder[];
+  ordersIsLoading: boolean;
+  error: string | null;
 };
 
 const initialState: TOrderState = {
   orderRequest: false,
   orderModalData: null,
-  orders: []
+  orders: [],
+  ordersIsLoading: false,
+  error: null
 };
 
 export const ordersSlice = createSlice({
@@ -38,7 +55,9 @@ export const ordersSlice = createSlice({
   },
   selectors: {
     selectOrderRequest: (state) => state.orderRequest,
-    selectOrderModalData: (state) => state.orderModalData
+    selectOrderModalData: (state) => state.orderModalData,
+    selectUserOrders: (state) => state.orders,
+    selectOrdersIsLoading: (state) => state.ordersIsLoading
   },
   extraReducers: (builder) => {
     builder
@@ -48,11 +67,28 @@ export const ordersSlice = createSlice({
       .addCase(orderBurger.fulfilled, (state, action) => {
         state.orderRequest = false;
         state.orderModalData = action.payload;
+      })
+      .addCase(getUserOrders.pending, (state) => {
+        state.ordersIsLoading = true;
+        state.error = null;
+      })
+      .addCase(getUserOrders.fulfilled, (state, action) => {
+        state.ordersIsLoading = false;
+        state.orders = action.payload;
+      })
+      .addCase(getUserOrders.rejected, (state, action) => {
+        state.ordersIsLoading = false;
+        state.error =
+          action.payload ?? action.error.message ?? 'Ошибка загрузки';
       });
   }
 });
 
-export const { selectOrderRequest, selectOrderModalData } =
-  ordersSlice.selectors;
+export const {
+  selectOrderRequest,
+  selectOrderModalData,
+  selectUserOrders,
+  selectOrdersIsLoading
+} = ordersSlice.selectors;
 
 export const { clearOrderModalData } = ordersSlice.actions;
