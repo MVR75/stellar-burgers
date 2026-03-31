@@ -40,6 +40,24 @@ export const constructorSlice = createSlice({
     clearConstructor: (state) => {
       state.bun = null;
       state.ingredients = [];
+    },
+    moveIngredientUp: (state, action: PayloadAction<number>) => {
+      const index = action.payload;
+      if (index <= 0 || index >= state.ingredients.length) return;
+
+      [state.ingredients[index - 1], state.ingredients[index]] = [
+        state.ingredients[index],
+        state.ingredients[index - 1]
+      ];
+    },
+    moveIngredientDown: (state, action: PayloadAction<number>) => {
+      const index = action.payload;
+      if (index < 0 || index >= state.ingredients.length - 1) return;
+
+      [state.ingredients[index], state.ingredients[index + 1]] = [
+        state.ingredients[index + 1],
+        state.ingredients[index]
+      ];
     }
   },
   selectors: {
@@ -47,7 +65,13 @@ export const constructorSlice = createSlice({
   }
 });
 
-export const { addIngredient, addBun, deleteIngredient, clearConstructor } =
-  constructorSlice.actions;
+export const {
+  addIngredient,
+  addBun,
+  deleteIngredient,
+  clearConstructor,
+  moveIngredientUp,
+  moveIngredientDown
+} = constructorSlice.actions;
 
 export const { selectState } = constructorSlice.selectors;
