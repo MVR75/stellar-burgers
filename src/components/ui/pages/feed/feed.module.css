@@ -5,6 +5,7 @@
   max-width: 1240px;
   margin-left: auto;
   margin-right: auto;
+  height: calc(100vh - 128px);
 }
 
 .titleBox {
