@@ -15,7 +15,7 @@ export const registerUser = createAsyncThunk<
   TUser,
   TRegisterData,
   { rejectValue: string }
->('user/register', async (data: TRegisterData, { rejectWithValue }) => {
+>('user/register', async (data, { rejectWithValue }) => {
   try {
     const response = await registerUserApi(data);
 
@@ -173,3 +173,5 @@ export const {
   selectUserError,
   selectIsLoading
 } = userSlice.selectors;
+
+export default userSlice.reducer;

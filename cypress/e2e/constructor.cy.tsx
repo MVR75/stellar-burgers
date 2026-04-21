@@ -100,6 +100,11 @@ describe('Оформление заказа', () => {
     cy.wait('@orderBurger');
   });
 
+  afterEach(() => {
+    cy.clearLocalStorage();
+    cy.clearCookie('accessToken');
+  });
+
   it('Модальное окно открылось с верным номером заказа', () => {
     const orderId = '104110';
 

@@ -33,7 +33,7 @@ describe('Тест асинхронных экшенов [ingredientsSlice]', ()
       resolveFn = resolve;
     });
 
-    const getIngredientsSpy = jest.spyOn(api, 'getIngredientsApi').mockResolvedValue(pendingPromise as any);
+    const getIngredientsSpy = jest.spyOn(api, 'getIngredientsApi').mockReturnValue(pendingPromise as any);
 
     const dispatchPromise = store.dispatch(getIngredients());
 

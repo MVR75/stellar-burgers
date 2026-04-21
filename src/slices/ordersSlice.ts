@@ -37,7 +37,7 @@ type TOrderState = {
   error: string | null;
 };
 
-const initialState: TOrderState = {
+export const initialState: TOrderState = {
   orderRequest: false,
   orderModalData: null,
   orders: [],
@@ -92,3 +92,5 @@ export const {
 } = ordersSlice.selectors;
 
 export const { clearOrderModalData } = ordersSlice.actions;
+
+export default ordersSlice.reducer;

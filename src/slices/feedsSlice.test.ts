@@ -1,6 +1,6 @@
 import * as api from '@api';
 import { configureStore } from '@reduxjs/toolkit';
-import feedsSliceReducer, { getFeeds } from '../slices/feedsSlice';
+import feedsSliceReducer, { getFeeds, getOrderByNumber } from '../slices/feedsSlice';
 
 const feedsMock = {
   success: true,
@@ -22,13 +22,41 @@ const feedsMock = {
   totalToday: 34
 };
 
-const store = configureStore({
-  reducer: {
-    feeds: feedsSliceReducer
-  }
-});
+const orderMock = {
+  success: true,
+  orders: [
+    {
+      _id: "69df79b5a64177001b332831",
+      ingredients: [
+        "643d69a5c3f7b9001cfa093d",
+        "643d69a5c3f7b9001cfa093e",
+        "643d69a5c3f7b9001cfa093d"
+      ],
+      owner: "69c51176a64177001b330abf",
+      status: "done",
+      name: "Флюоресцентный люминесцентный бургер",
+      createdAt: "2026-04-15T11:42:45.841Z",
+      updatedAt: "2026-04-15T11:42:46.062Z",
+      number: 104106,
+      __v: 0
+    }
+  ]
+};
+
+const makeStore = () => 
+  configureStore({
+    reducer: {
+      feeds: feedsSliceReducer
+    }
+  });
+
+let store: ReturnType<typeof makeStore>;
 
 describe('Тест асинхронных экшенов [ingredientsSlice]', () => {
+  beforeEach(() => {
+    store = makeStore();
+  });
+
   describe('Получить ленту заказов [getFeeds]', () => {
     test('[pending]', async () => {
       let resolveFn!: (value: typeof feedsMock) => void;
@@ -37,7 +65,7 @@ describe('Тест асинхронных экшенов [ingredientsSlice]', ()
         resolveFn = resolve;
       });
 
-      const getFeedsSpy = jest.spyOn(api, 'getFeedsApi').mockResolvedValue(pendingPromise as any);
+      const getFeedsSpy = jest.spyOn(api, 'getFeedsApi').mockReturnValue(pendingPromise as any);
 
       const dispatchPromise = store.dispatch(getFeeds());
 
@@ -79,6 +107,32 @@ describe('Тест асинхронных экшенов [ingredientsSlice]', ()
       expect(feeds.isLoading).toBe(false);
 
       expect(getFeedsSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Получить заказ по номеру [getOrderByNumber]', () => {
+    test('[fulfilled]', async () => {
+      const getOrderByNumberSpy = jest.spyOn(api, 'getOrderByNumberApi').mockResolvedValue(orderMock);
+
+      await store.dispatch(getOrderByNumber(orderMock.orders[0].number));
+
+      const { feeds } = store.getState();
+
+      expect(feeds.orders).toEqual(orderMock.orders);
+
+      expect(getOrderByNumberSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('[rejected]', async () => {
+      const getOrderByNumberSpy = jest.spyOn(api, 'getOrderByNumberApi').mockRejectedValue(new Error('error'));
+
+      await store.dispatch(getOrderByNumber(orderMock.orders[0].number));
+
+      const { feeds } = store.getState();
+
+      expect(feeds.error).toBe('error');
+
+      expect(getOrderByNumberSpy).toHaveBeenCalledTimes(1);
     });
   });
 });
