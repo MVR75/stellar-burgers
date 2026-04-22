@@ -7,17 +7,15 @@ import {
   TRegisterData,
   updateUserApi
 } from '@api';
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { TUser } from '@utils-types';
-import { stat } from 'fs';
 import { deleteCookie, setCookie } from '../utils/cookie';
-import { log } from 'console';
 
 export const registerUser = createAsyncThunk<
   TUser,
   TRegisterData,
   { rejectValue: string }
->('user/register', async (data: TRegisterData, { rejectWithValue }) => {
+>('user/register', async (data, { rejectWithValue }) => {
   try {
     const response = await registerUserApi(data);
 
@@ -175,3 +173,5 @@ export const {
   selectUserError,
   selectIsLoading
 } = userSlice.selectors;
+
+export default userSlice.reducer;

@@ -96,3 +96,5 @@ export const {
   selectFeed,
   selectOrderByNumber
 } = feedsSlice.selectors;
+
+export default feedsSlice.reducer;

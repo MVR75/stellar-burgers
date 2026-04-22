@@ -88,3 +88,5 @@ export const selectSauces = createSelector([selectIngredients], (ingredients) =>
 
 export const { selectLoading, selectIngredientsErrors, selectIngredientById } =
   ingredientsSlice.selectors;
+
+export default ingredientsSlice.reducer;
